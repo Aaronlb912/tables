@@ -10,7 +10,7 @@ Prompt file (do not wait for a paste):
 Kind: table editor. Not a search page. Not a board. Not a calendar.
 
 Local URL: http://127.0.0.1:48721/
-Repo: (local until first push) `C:\Users\aaron\Documents\tables`
+Repo: https://github.com/Aaronlb912/tables
 
 Pages:
 - Table list: open, new blank, duplicate, remove. Reset sample.
@@ -29,7 +29,7 @@ Empty bench is the empty table.
       row, edit cells, several tables, JSON download, demo running.
 - [x] Session 2: sort, search, duplicate a row from the row, miss
       on a blank table name, CSV in and out.
-- [ ] Session 3: add/rename/remove columns, persist polish, old
+- [x] Session 3: add/rename/remove columns, persist polish, old
       JSON still loads, empty table and bad file.
 - [ ] Session 4: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
@@ -68,13 +68,13 @@ do next. Quiet Remove. Old JSON still loads.
 
 ## This session
 
-Session 1-2 combined: table list, sample nursery table, click cells,
-add/duplicate/remove row, sort, search, CSV and JSON, persist.
+Session 3: add, rename, and remove columns. Empty table still shows
+the header. Blank title and blank column name miss. Last column stays.
 
 ## Next session
 
-Add, rename, and remove columns. Prove empty table, blank title, and
-a bad file in the browser. Do not SHIPPED yet.
+Screenshots, demo video, README Demo, LinkedIn draft, SHIPPED. Prove
+a bad JSON file in the browser first if that is still open.
 
 ## SHIPPED means
 

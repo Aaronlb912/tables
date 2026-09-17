@@ -32,6 +32,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   const [undo, setUndo] = useState(null)
   const [colRename, setColRename] = useState(null)
   const skipSave = useRef(false)
+  const skipCol = useRef(false)
   const colInput = useRef(null)
 
   useEffect(() => {
@@ -66,6 +67,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
         return
       }
       if (colRename) {
+        skipCol.current = true
         setColRename(null)
         return
       }
@@ -187,6 +189,10 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
 
   function commitColumn() {
     if (!colRename) return
+    if (skipCol.current) {
+      skipCol.current = false
+      return
+    }
     const name = colRename.draft.trim()
     if (!name) {
       setMiss('Need a column name.')
