@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react'
-import { cloneRow, isNumberColumn, normalizeRow, parseNumberCell } from './table-json.js'
+import { cloneRow, isNotesColumn, isNumberColumn, normalizeRow, parseNumberCell } from './table-json.js'
 import './table.css'
-
-function isNotesColumn(column) {
-  const name = String(column.name || column.id || '').toLowerCase()
-  return name === 'notes' || name === 'note'
-}
 
 export function RowPage({ table, row, mode, onSave, onCancel, onRemove, onDuplicate }) {
   const isNew = mode === 'new'

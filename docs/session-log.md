@@ -40,4 +40,12 @@ down. Shift+Enter up. Escape still cancels. A bad Qty stays on that
 cell.
 Next session: Expand G. Sticky header and first column.
 
+## 2026-09-17 - Expand G-J
+
+What runs: http://127.0.0.1:48721/
+What landed: Sticky header and first column. Copy CSV for the table
+or one row. Drag a header edge to resize. Width stays in JSON. Undo
+after Remove column. Notes wrap on the grid.
+Next session: ship later, when he asks.
+
 

@@ -8,6 +8,7 @@ import {
   downloadCsv,
   downloadTable,
   isNumberColumn,
+  isNotesColumn,
   moveById,
   normalizeTable,
   parseCsv,
@@ -17,7 +18,9 @@ import {
   removeColumn,
   renameColumn,
   rowMatches,
+  rowToCsv,
   sortRows,
+  tableToCsv,
 } from './table-json.js'
 import './table.css'
 
@@ -46,6 +49,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   const [overCol, setOverCol] = useState(null)
   const skipSort = useRef(false)
   const moving = useRef(false)
+  const [sizing, setSizing] = useState(null)
 
   useEffect(() => {
     setTableTitle(value.title)
@@ -291,13 +295,30 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       rows: value.rows.filter((item) => item.id !== id),
     })
     if (undoTimer.current) clearTimeout(undoTimer.current)
-    setUndo({ row, index })
+    setUndo({ kind: 'row', row, index })
     undoTimer.current = setTimeout(() => setUndo(null), 12000)
   }
 
   function undoRemove() {
     if (!undo) return
     if (undoTimer.current) clearTimeout(undoTimer.current)
+    if (undo.kind === 'column') {
+      const columns = [...value.columns]
+      columns.splice(Math.min(undo.index, columns.length), 0, undo.column)
+      const rows = value.rows.map((row) => {
+        const saved = undo.cells.find((item) => item.id === row.id)
+        return {
+          ...row,
+          cells: {
+            ...row.cells,
+            [undo.column.id]: saved ? saved.value : '',
+          },
+        }
+      })
+      onChange({ ...value, columns, rows })
+      setUndo(null)
+      return
+    }
     const rows = [...value.rows]
     const at = Math.min(undo.index, rows.length)
     rows.splice(at, 0, undo.row)
@@ -331,6 +352,8 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   }
 
   function dropColumn(colId) {
+    const index = value.columns.findIndex((item) => item.id === colId)
+    const column = value.columns[index]
     const result = removeColumn(value, colId)
     if (!result.ok) {
       setMiss(result.error)
@@ -345,6 +368,14 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     if (colRename?.id === colId) setColRename(null)
     onChange(result.table)
     setMiss('')
+    if (undoTimer.current) clearTimeout(undoTimer.current)
+    setUndo({
+      kind: 'column',
+      column,
+      index,
+      cells: value.rows.map((row) => ({ id: row.id, value: row.cells?.[colId] || '' })),
+    })
+    undoTimer.current = setTimeout(() => setUndo(null), 12000)
   }
 
   function toggleSort(colId) {
@@ -442,6 +473,57 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     setMiss('')
   }
 
+  function widthOf(column) {
+    if (sizing && sizing.id === column.id) return sizing.width
+    return column.width
+  }
+
+  function startSize(event, column) {
+    event.preventDefault()
+    event.stopPropagation()
+    skipSort.current = true
+    const startX = event.clientX
+    const startW = event.currentTarget.closest('th').getBoundingClientRect().width
+    let width = Math.max(72, Math.round(startW))
+    setSizing({ id: column.id, width })
+
+    function onMove(moveEvent) {
+      width = Math.max(72, Math.round(startW + moveEvent.clientX - startX))
+      setSizing({ id: column.id, width })
+    }
+
+    function onUp() {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+      onChange({
+        ...value,
+        columns: value.columns.map((item) => (item.id === column.id ? { ...item, width } : item)),
+      })
+      setSizing(null)
+    }
+
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
+
+  async function copyCsv() {
+    try {
+      await navigator.clipboard.writeText(tableToCsv(value))
+      setMiss('')
+    } catch {
+      setMiss('Could not copy. Download CSV instead.')
+    }
+  }
+
+  async function copyRow(row) {
+    try {
+      await navigator.clipboard.writeText(rowToCsv(value, row))
+      setMiss('')
+    } catch {
+      setMiss('Could not copy. Download CSV instead.')
+    }
+  }
+
   return (
     <div className="tb">
       <header className="tb-top">
@@ -474,7 +556,8 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
           <p className="tb-note">
             Click a cell to change it. Tab moves across. Enter moves down.
             Open a row for the whole line. Drag a row or a column to change
-            order. Paste a CSV or print this table.
+            order. Drag a header edge to resize. Copy CSV. Paste a CSV or
+            print this table.
           </p>
         </div>
         <div className="tb-actions">
@@ -494,6 +577,9 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
           </button>
           <button type="button" className="tb-secondary" onClick={() => downloadCsv(value)}>
             Download CSV
+          </button>
+          <button type="button" className="tb-secondary" onClick={copyCsv}>
+            Copy CSV
           </button>
           <button type="button" className="tb-secondary" onClick={() => jsonInput.current?.click()}>
             Load JSON
@@ -554,7 +640,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       {miss ? <p className="tb-miss" role="alert">{miss}</p> : null}
       {undo ? (
         <p className="tb-undo">
-          Row removed.{' '}
+          {undo.kind === 'column' ? 'Column removed.' : 'Row removed.'}{' '}
           <button type="button" className="tb-quiet" onClick={undoRemove}>
             Put it back
           </button>
@@ -570,20 +656,41 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
         </div>
       ) : (
         <div className="tb-scroll">
-          <table className="tb-grid">
+          <table
+            className="tb-grid"
+            style={
+              value.columns.some((column) => widthOf(column))
+                ? {
+                    tableLayout: 'fixed',
+                    width: value.columns.reduce((sum, column) => sum + (widthOf(column) || 140), 88),
+                  }
+                : undefined
+            }
+          >
             <thead>
               <tr>
-                {value.columns.map((column) => {
+                {value.columns.map((column, colIndex) => {
                   const active = sort?.colId === column.id
                   const label = active ? `${column.name} ${sort.dir === 'desc' ? '↓' : '↑'}` : column.name
                   const renamingCol = colRename?.id === column.id
+                  const colWidth = widthOf(column)
                   return (
                     <th
                       key={column.id}
                       scope="col"
-                      draggable={!renamingCol}
-                      className={overCol === column.id ? 'tb-drop-col' : undefined}
+                      draggable={!renamingCol && !sizing}
+                      className={[
+                        overCol === column.id ? 'tb-drop-col' : '',
+                        colIndex === 0 ? 'tb-sticky-col' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ') || undefined}
+                      style={colWidth ? { width: colWidth, minWidth: colWidth } : undefined}
                       onDragStart={(event) => {
+                        if (sizing) {
+                          event.preventDefault()
+                          return
+                        }
                         setDragCol(column.id)
                         skipSort.current = true
                         event.dataTransfer.effectAllowed = 'move'
@@ -634,6 +741,13 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                           </button>
                         </div>
                       )}
+                      <button
+                        type="button"
+                        className="tb-resize"
+                        aria-label={`Resize ${column.name}`}
+                        draggable={false}
+                        onMouseDown={(event) => startSize(event, column)}
+                      />
                     </th>
                   )
                 })}
@@ -682,11 +796,23 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                     setOverRow(null)
                   }}
                 >
-                  {value.columns.map((column) => {
+                  {value.columns.map((column, colIndex) => {
                     const active = editing && editing.rowId === row.id && editing.colId === column.id
                     const numberCol = isNumberColumn(column)
+                    const notesCol = isNotesColumn(column)
+                    const colWidth = widthOf(column)
                     return (
-                      <td key={column.id} className={numberCol ? 'tb-num' : undefined}>
+                      <td
+                        key={column.id}
+                        className={[
+                          numberCol ? 'tb-num' : '',
+                          notesCol ? 'tb-notes' : '',
+                          colIndex === 0 ? 'tb-sticky-col' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ') || undefined}
+                        style={colWidth ? { width: colWidth, minWidth: colWidth } : undefined}
+                      >
                         {active ? (
                           <input
                             ref={cellInput}
@@ -733,6 +859,9 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                     <button type="button" className="tb-quiet" onClick={() => openRow(row)}>
                       Open
                     </button>
+                    <button type="button" className="tb-quiet" onClick={() => copyRow(row)}>
+                      Copy
+                    </button>
                     <button type="button" className="tb-quiet" onClick={() => duplicateRow(row.id)}>
                       Duplicate
                     </button>
@@ -748,7 +877,15 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
               <tfoot>
                 <tr>
                   {value.columns.map((column, index) => (
-                    <td key={column.id} className={isNumberColumn(column) ? 'tb-total tb-num' : undefined}>
+                    <td
+                      key={column.id}
+                      className={[
+                        isNumberColumn(column) ? 'tb-total tb-num' : '',
+                        index === 0 ? 'tb-sticky-col' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ') || undefined}
+                    >
                       {isNumberColumn(column) ? columnTotal(shown, column) : index === 0 ? 'Total' : ''}
                     </td>
                   ))}

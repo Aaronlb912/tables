@@ -19,8 +19,10 @@ Pages:
 - Table list: open, new blank, duplicate, remove. Reset sample.
 - Table: grid, click to edit, add row opens a page, Open a row,
   load and download JSON (this table or all tables), paste CSV,
-  print, drag a row or a column. Escape cancels a cell or a page.
-  Quiet Remove. Undo after Remove. Qty total. Bad number misses.
+  copy CSV, print, drag a row or a column, resize a column.
+  Escape cancels a cell or a page. Quiet Remove. Undo after Remove
+  on a row or a column. Qty total. Bad number misses. Sticky
+  header and first column.
 - Row page: every column as a field. Notes is a longer box.
 
 Auth: none.
@@ -44,20 +46,21 @@ Empty bench is the empty table.
 - [x] Expand D: paste CSV from the clipboard. Print this table.
 - [x] Expand E: CSS pass. Prove a junk JSON file in the browser.
 - [x] Expand F: Tab and Enter through cells.
-- [ ] Expand G: sticky header and first column.
-- [ ] Expand H: copy this table or one row as CSV.
-- [ ] Expand I: drag a column edge to resize.
-- [ ] Expand J: undo a removed column, wrap notes, CSS.
+- [x] Expand G: sticky header and first column.
+- [x] Expand H: copy this table or one row as CSV.
+- [x] Expand I: drag a column edge to resize.
+- [x] Expand J: undo a removed column, wrap notes, CSS.
 - [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
 
 ## This session
 
-Expand F: Tab and Enter through cells. Landed.
+Expand G-J: sticky header, copy CSV, column width, undo column.
 
 ## Next session
 
-Expand G: sticky header and first column.
+Ship later, when he asks. Screenshots, demo video, README Demo,
+LinkedIn draft, SHIPPED.
 
 ## Usefulness check
 

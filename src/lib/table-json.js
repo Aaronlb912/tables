@@ -16,10 +16,13 @@ export function newRowId() {
 
 export function normalizeColumn(column, index) {
   const raw = column && typeof column === 'object' ? column : {}
-  return {
+  const next = {
     id: String(raw.id || `col-${index + 1}`),
     name: String(raw.name || raw.label || `Column ${index + 1}`),
   }
+  const width = Number(raw.width)
+  if (Number.isFinite(width) && width >= 72) next.width = Math.round(width)
+  return next
 }
 
 export function normalizeRow(row, columns, index) {
@@ -158,6 +161,11 @@ export function isNumberColumn(column) {
   return name === 'qty' || name === 'count' || name === 'amount' || name === 'quantity'
 }
 
+export function isNotesColumn(column) {
+  const name = String(column.name || column.id || '').toLowerCase().trim()
+  return name === 'notes' || name === 'note'
+}
+
 export function parseNumberCell(text) {
   const raw = String(text || '').trim()
   if (raw === '') return { ok: true, value: null }
@@ -255,6 +263,12 @@ export function tableToCsv(table) {
   const header = next.columns.map((column) => csvEscape(column.name)).join(',')
   const lines = next.rows.map((row) => next.columns.map((column) => csvEscape(row.cells[column.id])).join(','))
   return `${[header, ...lines].join('\r\n')}\r\n`
+}
+
+export function rowToCsv(table, row) {
+  const next = normalizeTable(table)
+  const found = next.rows.find((item) => item.id === row.id) || normalizeRow(row, next.columns, 0)
+  return `${next.columns.map((column) => csvEscape(found.cells[column.id])).join(',')}\r\n`
 }
 
 export function downloadCsv(table) {

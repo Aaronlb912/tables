@@ -149,7 +149,8 @@
 }
 
 .tb-scroll {
-  overflow-x: auto;
+  overflow: auto;
+  max-height: min(70vh, calc(100vh - 220px));
   background: var(--tb-paper);
   border: 1px solid var(--tb-line);
 }
@@ -162,6 +163,9 @@
 }
 
 .tb-grid th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
   text-align: left;
   font-weight: 600;
   font-size: 12px;
@@ -169,7 +173,7 @@
   text-transform: uppercase;
   color: var(--tb-paper);
   background: var(--tb-head);
-  padding: 10px 12px;
+  padding: 10px 14px 10px 12px;
   white-space: nowrap;
 }
 
@@ -501,10 +505,74 @@
 }
 
 .tb-grid tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   border-top: 2px solid var(--tb-ink);
   padding: 10px 12px;
   background: #e7eedd;
   font-weight: 600;
+}
+
+.tb-grid .tb-sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  box-shadow: 2px 0 0 var(--tb-line);
+}
+
+.tb-grid thead th.tb-sticky-col {
+  z-index: 5;
+  box-shadow: 2px 0 0 rgba(0, 0, 0, 0.18);
+}
+
+.tb-grid tbody td.tb-sticky-col {
+  background: var(--tb-paper);
+}
+
+.tb-grid tbody tr:hover td.tb-sticky-col,
+.tb-grid tbody tr:focus-within td.tb-sticky-col {
+  background: #eef3e6;
+}
+
+.tb-grid tfoot td.tb-sticky-col {
+  z-index: 4;
+  left: 0;
+}
+
+.tb-notes .tb-cell,
+.tb-notes .tb-cell-input,
+.tb button.tb-notes .tb-cell {
+  white-space: pre-wrap;
+  line-height: 1.35;
+}
+
+.tb-resize {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  cursor: col-resize;
+}
+
+.tb button.tb-resize {
+  background: transparent;
+  border: 0;
+  color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.tb-resize:hover,
+.tb button.tb-resize:hover,
+.tb button.tb-resize:focus-visible {
+  background: #fffef8;
+  border-color: transparent;
+  color: transparent;
 }
 
 .tb-grid tbody tr {
@@ -560,8 +628,20 @@
 
   .tb-scroll {
     overflow: visible;
+    max-height: none;
     border: 0;
     background: #fff;
+  }
+
+  .tb-grid th,
+  .tb-grid .tb-sticky-col,
+  .tb-grid tfoot td {
+    position: static;
+    box-shadow: none;
+  }
+
+  .tb-resize {
+    display: none;
   }
 
   .tb-grid th {
