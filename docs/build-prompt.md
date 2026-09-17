@@ -22,7 +22,8 @@ Pages:
   copy CSV, print, drag a row or a column, resize a column.
   Escape cancels a cell or a page. Quiet Remove. Undo after Remove
   on a row or a column. Qty total. Bad number misses. Sticky
-  header and first column. Hide a column.
+  header and first column. Hide a column. Filter a column.
+  Check rows. Add CSV onto the open table. Search highlight.
 - Row page: every column as a field. Notes is a longer box.
 
 Auth: none.
@@ -51,20 +52,21 @@ Empty bench is the empty table.
 - [x] Expand I: drag a column edge to resize.
 - [x] Expand J: undo a removed column, wrap notes, CSS.
 - [x] Expand K: hide a column on the grid.
-- [ ] Expand L: filter a column.
-- [ ] Expand M: check rows and remove selected.
-- [ ] Expand N: append CSV onto the open table.
-- [ ] Expand O: search highlight and CSS.
+- [x] Expand L: filter a column.
+- [x] Expand M: check rows and remove selected.
+- [x] Expand N: append CSV onto the open table.
+- [x] Expand O: search highlight and CSS.
 - [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
 
 ## This session
 
-Expand K: hide a column on the grid. Landed.
+Expand L-O: filter, check rows, append CSV, search
+highlight. Landed.
 
 ## Next session
 
-Expand L: filter a column.
+Ship later, when he asks.
 
 ## Usefulness check
 

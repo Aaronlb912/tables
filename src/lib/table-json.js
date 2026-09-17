@@ -157,6 +157,48 @@ export function rowMatches(row, query, columns) {
   return columns.some((column) => String(row.cells?.[column.id] || '').toLowerCase().includes(needle))
 }
 
+export function rowMatchesFilter(row, filter) {
+  if (!filter?.colId) return true
+  const text = String(row.cells?.[filter.colId] || '').trim()
+  if (filter.value === '') return text === ''
+  return text === filter.value
+}
+
+export function columnValues(rows, column) {
+  const seen = new Set()
+  const values = []
+  rows.forEach((row) => {
+    const text = String(row.cells?.[column.id] || '').trim()
+    if (!text || seen.has(text)) return
+    seen.add(text)
+    values.push(text)
+  })
+  return values.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+}
+
+export function appendCsv(table, text) {
+  const incoming = parseCsv(text)
+  const byName = new Map()
+  table.columns.forEach((column) => {
+    const key = String(column.name || '').toLowerCase().trim()
+    if (key && !byName.has(key)) byName.set(key, column.id)
+  })
+  const matched = incoming.columns.some((column) => byName.has(String(column.name || '').toLowerCase().trim()))
+  if (!matched) throw new Error('None of those column names match this table.')
+  const rows = incoming.rows.map((row) => {
+    const cells = {}
+    table.columns.forEach((column) => {
+      cells[column.id] = ''
+    })
+    incoming.columns.forEach((column) => {
+      const dest = byName.get(String(column.name || '').toLowerCase().trim())
+      if (dest) cells[dest] = row.cells[column.id] || ''
+    })
+    return { id: newRowId(), cells }
+  })
+  return { ...table, rows: [...table.rows, ...rows] }
+}
+
 export function isNumberColumn(column) {
   const name = String(column.name || column.id || '').toLowerCase().trim()
   return name === 'qty' || name === 'count' || name === 'amount' || name === 'quantity'

@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { RowPage } from './RowPage.jsx'
 import {
   addColumn,
+  appendCsv,
   blankRow,
   cloneRow,
   columnTotal,
+  columnValues,
   downloadCsv,
   downloadTable,
   hideColumn,
@@ -19,6 +21,7 @@ import {
   removeColumn,
   renameColumn,
   rowMatches,
+  rowMatchesFilter,
   rowToCsv,
   showColumn,
   sortRows,
@@ -27,18 +30,52 @@ import {
 } from './table-json.js'
 import './table.css'
 
+const ALL_VALUES = '__all__'
+const EMPTY_VALUE = '__empty__'
+
+function markHits(text, query) {
+  const raw = String(text || '')
+  const needle = String(query || '').trim()
+  if (!needle || !raw) return raw
+  const lower = raw.toLowerCase()
+  const find = needle.toLowerCase()
+  const parts = []
+  let i = 0
+  let n = 0
+  while (i < raw.length) {
+    const at = lower.indexOf(find, i)
+    if (at < 0) {
+      parts.push(raw.slice(i))
+      break
+    }
+    if (at > i) parts.push(raw.slice(i, at))
+    parts.push(
+      <mark key={n} className="tb-hit">
+        {raw.slice(at, at + needle.length)}
+      </mark>,
+    )
+    n += 1
+    i = at + needle.length
+  }
+  return parts
+}
+
 export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   const titleInput = useRef(null)
   const cellInput = useRef(null)
   const jsonInput = useRef(null)
   const csvInput = useRef(null)
+  const csvAddInput = useRef(null)
   const undoTimer = useRef(null)
+  const allBox = useRef(null)
   const [tableTitle, setTableTitle] = useState(value.title)
   const [renaming, setRenaming] = useState(false)
   const [miss, setMiss] = useState('')
   const [editing, setEditing] = useState(null)
   const [draft, setDraft] = useState('')
   const [query, setQuery] = useState('')
+  const [colFilter, setColFilter] = useState(null)
+  const [checked, setChecked] = useState({})
   const [sort, setSort] = useState(null)
   const [undo, setUndo] = useState(null)
   const [colRename, setColRename] = useState(null)
@@ -94,11 +131,15 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
         setTableTitle(value.title)
         setRenaming(false)
         setMiss('')
+        return
+      }
+      if (Object.keys(checked).length) {
+        setChecked({})
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [editing, renaming, colRename, value.title])
+  }, [editing, renaming, colRename, checked, value.title])
 
   useEffect(() => {
     return () => {
@@ -116,8 +157,13 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       const text = event.clipboardData?.getData('text/plain') || ''
       if (!text.trim()) return
       try {
-        const next = parseCsv(text)
         event.preventDefault()
+        if (event.shiftKey) {
+          onChange(appendCsv(value, text))
+          setMiss('')
+          return
+        }
+        const next = parseCsv(text)
         onChange({
           ...next,
           id: value.id,
@@ -125,6 +171,8 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
         })
         setMiss('')
         setQuery('')
+        setColFilter(null)
+        setChecked({})
         setSort(null)
       } catch (error) {
         setMiss(error.message || 'Could not paste that CSV.')
@@ -132,15 +180,26 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     }
     window.addEventListener('paste', onPaste)
     return () => window.removeEventListener('paste', onPaste)
-  }, [onChange, page, value.id, value.title])
+  }, [onChange, page, value])
 
   const filtering = Boolean(query.trim())
-  const matched = filtering
+  const searched = filtering
     ? value.rows.filter((row) => rowMatches(row, query, value.columns))
     : value.rows
+  const matched = colFilter
+    ? searched.filter((row) => rowMatchesFilter(row, colFilter))
+    : searched
   const shown = sortRows(matched, value.columns, sort)
   const gridCols = visibleColumns(value.columns)
   const hiddenCols = value.columns.filter((column) => column.hidden)
+  const shownChecked = shown.filter((row) => checked[row.id]).length
+  const allChecked = shown.length > 0 && shownChecked === shown.length
+  const checkCount = Object.keys(checked).length
+
+  useEffect(() => {
+    if (!allBox.current) return
+    allBox.current.indeterminate = shownChecked > 0 && !allChecked
+  }, [shownChecked, allChecked])
 
   if (page) {
     return (
@@ -324,11 +383,83 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       setUndo(null)
       return
     }
+    if (undo.kind === 'rows') {
+      const rows = [...value.rows]
+      undo.rows
+        .slice()
+        .sort((a, b) => a.index - b.index)
+        .forEach(({ row, index }) => {
+          rows.splice(Math.min(index, rows.length), 0, row)
+        })
+      onChange({ ...value, rows })
+      setUndo(null)
+      return
+    }
     const rows = [...value.rows]
     const at = Math.min(undo.index, rows.length)
     rows.splice(at, 0, undo.row)
     onChange({ ...value, rows })
     setUndo(null)
+  }
+
+  function removeSelected() {
+    const ids = new Set(Object.keys(checked))
+    if (!ids.size) return
+    const removed = []
+    value.rows.forEach((row, index) => {
+      if (ids.has(row.id)) removed.push({ row, index })
+    })
+    if (!removed.length) return
+    if (editing && ids.has(editing.rowId)) {
+      setEditing(null)
+      setDraft('')
+    }
+    onChange({
+      ...value,
+      rows: value.rows.filter((row) => !ids.has(row.id)),
+    })
+    setChecked({})
+    if (undoTimer.current) clearTimeout(undoTimer.current)
+    setUndo({ kind: 'rows', rows: removed })
+    undoTimer.current = setTimeout(() => setUndo(null), 12000)
+    setMiss('')
+  }
+
+  function toggleCheck(id) {
+    setChecked((current) => {
+      const next = { ...current }
+      if (next[id]) delete next[id]
+      else next[id] = true
+      return next
+    })
+  }
+
+  function toggleAllShown() {
+    setChecked((current) => {
+      const next = { ...current }
+      if (allChecked) {
+        shown.forEach((row) => {
+          delete next[row.id]
+        })
+      } else {
+        shown.forEach((row) => {
+          next[row.id] = true
+        })
+      }
+      return next
+    })
+  }
+
+  function pickFilter(colId, raw) {
+    if (raw === ALL_VALUES) setColFilter(null)
+    else if (raw === EMPTY_VALUE) setColFilter({ colId, value: '' })
+    else setColFilter({ colId, value: raw })
+  }
+
+  function filterValue(column) {
+    if (colFilter?.colId !== column.id) return ALL_VALUES
+    if (colFilter.value === '') return EMPTY_VALUE
+    return colFilter.value
   }
 
   function addCol() {
@@ -371,6 +502,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     }
     if (sort?.colId === colId) setSort(null)
     if (colRename?.id === colId) setColRename(null)
+    if (colFilter?.colId === colId) setColFilter(null)
     onChange(result.table)
     setMiss('')
     if (undoTimer.current) clearTimeout(undoTimer.current)
@@ -395,6 +527,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       setDraft('')
     }
     if (colRename?.id === colId) setColRename(null)
+    if (colFilter?.colId === colId) setColFilter(null)
     onChange(result.table)
     setMiss('')
   }
@@ -447,9 +580,22 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       setMiss('')
       setUndo(null)
       setQuery('')
+      setColFilter(null)
+      setChecked({})
       setSort(null)
     } catch (error) {
       setMiss(error.message || 'Could not load that CSV.')
+    }
+  }
+
+  async function addCsv(file) {
+    if (!file) return
+    try {
+      const text = await readTextFile(file)
+      onChange(appendCsv(value, text))
+      setMiss('')
+    } catch (error) {
+      setMiss(error.message || 'Could not add that CSV.')
     }
   }
 
@@ -469,6 +615,8 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       setMiss('')
       setUndo(null)
       setQuery('')
+      setColFilter(null)
+      setChecked({})
       setSort(null)
     } catch (error) {
       setMiss(error.message || 'Could not paste that CSV.')
@@ -583,7 +731,9 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             Click a cell to change it. Tab moves across. Enter moves down.
             Open a row for the whole line. Drag a row or a column to change
             order. Drag a header edge to resize. Hide a column you do not
-            need on the grid. Copy CSV. Paste a CSV or print this table.
+            need on the grid. Filter a column. Check rows to remove a few
+            at once. Copy CSV. Paste a CSV to replace, Shift+paste or Add
+            CSV to append. Print this table.
           </p>
         </div>
         <div className="tb-actions">
@@ -613,6 +763,9 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
           <button type="button" className="tb-secondary" onClick={() => csvInput.current?.click()}>
             Load CSV
           </button>
+          <button type="button" className="tb-secondary" onClick={() => csvAddInput.current?.click()}>
+            Add CSV
+          </button>
           <button type="button" className="tb-secondary" onClick={pasteCsv}>
             Paste CSV
           </button>
@@ -639,6 +792,16 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
               event.target.value = ''
             }}
           />
+          <input
+            ref={csvAddInput}
+            className="tb-file"
+            type="file"
+            accept="text/csv,.csv"
+            onChange={(event) => {
+              addCsv(event.target.files && event.target.files[0])
+              event.target.value = ''
+            }}
+          />
         </div>
       </header>
 
@@ -652,7 +815,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             onChange={(event) => setQuery(event.target.value)}
           />
         </label>
-        {filtering ? (
+        {filtering || colFilter ? (
           <p className="tb-hint">
             {shown.length} of {value.rows.length} {value.rows.length === 1 ? 'row' : 'rows'}
           </p>
@@ -661,6 +824,16 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             {value.rows.length} {value.rows.length === 1 ? 'row' : 'rows'}
           </p>
         )}
+        {colFilter ? (
+          <button type="button" className="tb-secondary" onClick={() => setColFilter(null)}>
+            Clear filter
+          </button>
+        ) : null}
+        {checkCount ? (
+          <button type="button" className="tb-secondary" onClick={removeSelected}>
+            Remove selected ({checkCount})
+          </button>
+        ) : null}
       </div>
 
       {hiddenCols.length ? (
@@ -677,7 +850,11 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       {miss ? <p className="tb-miss" role="alert">{miss}</p> : null}
       {undo ? (
         <p className="tb-undo">
-          {undo.kind === 'column' ? 'Column removed.' : 'Row removed.'}{' '}
+          {undo.kind === 'column'
+            ? 'Column removed.'
+            : undo.kind === 'rows'
+              ? `${undo.rows.length} ${undo.rows.length === 1 ? 'row' : 'rows'} removed.`
+              : 'Row removed.'}{' '}
           <button type="button" className="tb-quiet" onClick={undoRemove}>
             Put it back
           </button>
@@ -686,10 +863,17 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
 
       {value.rows.length > 0 && shown.length === 0 ? (
         <div className="tb-empty">
-          <p>Nothing matches that search.</p>
-          <button type="button" className="tb-secondary" onClick={() => setQuery('')}>
-            Clear search
-          </button>
+          <p>{colFilter && !filtering ? 'Nothing matches that filter.' : 'Nothing matches that search.'}</p>
+          {filtering ? (
+            <button type="button" className="tb-secondary" onClick={() => setQuery('')}>
+              Clear search
+            </button>
+          ) : null}
+          {colFilter ? (
+            <button type="button" className="tb-secondary" onClick={() => setColFilter(null)}>
+              Clear filter
+            </button>
+          ) : null}
         </div>
       ) : (
         <div className="tb-scroll">
@@ -699,13 +883,23 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
               value.columns.some((column) => widthOf(column) && !column.hidden)
                 ? {
                     tableLayout: 'fixed',
-                    width: gridCols.reduce((sum, column) => sum + (widthOf(column) || 140), 88),
+                    width: gridCols.reduce((sum, column) => sum + (widthOf(column) || 140), 124),
                   }
                 : undefined
             }
           >
             <thead>
               <tr>
+                <th className="tb-check" scope="col">
+                  <input
+                    ref={allBox}
+                    type="checkbox"
+                    checked={allChecked}
+                    onChange={toggleAllShown}
+                    aria-label="Select shown rows"
+                    disabled={!shown.length}
+                  />
+                </th>
                 {gridCols.map((column, colIndex) => {
                   const active = sort?.colId === column.id
                   const label = active ? `${column.name} ${sort.dir === 'desc' ? '↓' : '↑'}` : column.name
@@ -724,7 +918,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                         .join(' ') || undefined}
                       style={colWidth ? { width: colWidth, minWidth: colWidth } : undefined}
                       onDragStart={(event) => {
-                        if (sizing) {
+                        if (sizing || event.target.closest('input, select, .tb-filter')) {
                           event.preventDefault()
                           return
                         }
@@ -779,6 +973,22 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                           <button type="button" className="tb-quiet" onClick={() => dropColumn(column.id)}>
                             Remove
                           </button>
+                          <select
+                            className="tb-filter"
+                            aria-label={`Filter ${column.name}`}
+                            value={filterValue(column)}
+                            onClick={(event) => event.stopPropagation()}
+                            onMouseDown={(event) => event.stopPropagation()}
+                            onChange={(event) => pickFilter(column.id, event.target.value)}
+                          >
+                            <option value={ALL_VALUES}>All</option>
+                            <option value={EMPTY_VALUE}>Empty</option>
+                            {columnValues(value.rows, column).map((item) => (
+                              <option key={item} value={item}>
+                                {item}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       )}
                       <button
@@ -799,7 +1009,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             <tbody>
               {value.rows.length === 0 ? (
                 <tr>
-                  <td colSpan={gridCols.length + 1}>
+                  <td colSpan={gridCols.length + 2}>
                     <div className="tb-empty tb-empty-cell">
                       <p>No rows yet. Add a row, or load a CSV or JSON file.</p>
                       <button type="button" onClick={addRow}>
@@ -813,9 +1023,14 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                 <tr
                   key={row.id}
                   draggable={!editing}
-                  className={overRow === row.id ? 'tb-drop-row' : undefined}
+                  className={[
+                    overRow === row.id ? 'tb-drop-row' : '',
+                    checked[row.id] ? 'tb-checked' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ') || undefined}
                   onDragStart={(event) => {
-                    if (editing) {
+                    if (editing || event.target.closest('input, select, button')) {
                       event.preventDefault()
                       return
                     }
@@ -836,6 +1051,16 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                     setOverRow(null)
                   }}
                 >
+                  <td className="tb-check">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(checked[row.id])}
+                      onChange={() => toggleCheck(row.id)}
+                      onClick={(event) => event.stopPropagation()}
+                      onMouseDown={(event) => event.stopPropagation()}
+                      aria-label={`Select row ${row.cells[gridCols[0]?.id] || row.id}`}
+                    />
+                  </td>
                   {gridCols.map((column, colIndex) => {
                     const active = editing && editing.rowId === row.id && editing.colId === column.id
                     const numberCol = isNumberColumn(column)
@@ -889,7 +1114,11 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                             className="tb-cell"
                             onClick={() => startEdit(row, column)}
                           >
-                            {row.cells[column.id] || <span className="tb-blank">Empty</span>}
+                            {row.cells[column.id] ? (
+                              markHits(row.cells[column.id], query)
+                            ) : (
+                              <span className="tb-blank">Empty</span>
+                            )}
                           </button>
                         )}
                       </td>
@@ -916,6 +1145,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             {value.rows.length > 0 && gridCols.some(isNumberColumn) ? (
               <tfoot>
                 <tr>
+                  <td className="tb-check" />
                   {gridCols.map((column, index) => (
                     <td
                       key={column.id}

@@ -257,9 +257,17 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 16px;
+  padding: 8px 10px;
+  border: 1px solid var(--tb-line);
+  background: #e7eedd;
   font-family: var(--tb-ui);
   font-size: 13px;
   color: var(--tb-ink-soft);
+}
+
+.tb-hidden button {
+  font-size: 12px;
+  padding: 4px 8px;
 }
 
 .tb-search {
@@ -504,7 +512,19 @@
   }
 
   .tb-grid {
-    min-width: 720px;
+    min-width: 640px;
+  }
+
+  .tb-note {
+    max-width: none;
+  }
+
+  .tb-filter {
+    max-width: 100%;
+  }
+
+  .tb-hidden {
+    padding: 8px;
   }
 }
 
@@ -525,9 +545,71 @@
   font-weight: 600;
 }
 
-.tb-grid .tb-sticky-col {
+.tb-grid .tb-check {
   position: sticky;
   left: 0;
+  z-index: 3;
+  width: 2.25rem;
+  min-width: 2.25rem;
+  max-width: 2.25rem;
+  padding: 6px 4px;
+  text-align: center;
+  background: inherit;
+  box-shadow: none;
+}
+
+.tb-grid thead th.tb-check {
+  z-index: 6;
+  background: var(--tb-head);
+}
+
+.tb-grid tbody td.tb-check {
+  background: var(--tb-paper);
+}
+
+.tb-grid tfoot td.tb-check {
+  z-index: 5;
+  background: #e7eedd;
+}
+
+.tb-filter {
+  display: block;
+  width: calc(100% - 8px);
+  max-width: 11rem;
+  margin: 6px 0 0;
+  padding: 3px 4px;
+  font-family: var(--tb-ui);
+  font-size: 12px;
+  color: var(--tb-ink);
+  background: #fffef8;
+  border: 1px solid var(--tb-line);
+}
+
+.tb-hit {
+  background: #f3e3a0;
+  color: inherit;
+  padding: 0 1px;
+  font: inherit;
+}
+
+.tb-grid tbody tr:nth-child(even) td {
+  background: #efeadd;
+}
+
+.tb-grid tbody tr:nth-child(even) td.tb-sticky-col,
+.tb-grid tbody tr:nth-child(even) td.tb-check {
+  background: #efeadd;
+}
+
+.tb-grid tbody tr.tb-checked td,
+.tb-grid tbody tr.tb-checked td.tb-sticky-col,
+.tb-grid tbody tr.tb-checked td.tb-check {
+  background: #e4ecd4;
+}
+
+.tb-grid .tb-sticky-col {
+  position: sticky;
+  left: 2.25rem;
   z-index: 1;
   box-shadow: 2px 0 0 var(--tb-line);
 }
@@ -541,14 +623,18 @@
   background: var(--tb-paper);
 }
 
+.tb-grid tbody tr:hover td,
+.tb-grid tbody tr:focus-within td,
 .tb-grid tbody tr:hover td.tb-sticky-col,
-.tb-grid tbody tr:focus-within td.tb-sticky-col {
+.tb-grid tbody tr:focus-within td.tb-sticky-col,
+.tb-grid tbody tr:hover td.tb-check,
+.tb-grid tbody tr:focus-within td.tb-check {
   background: #eef3e6;
 }
 
 .tb-grid tfoot td.tb-sticky-col {
   z-index: 4;
-  left: 0;
+  left: 2.25rem;
 }
 
 .tb-notes .tb-cell,
@@ -628,7 +714,9 @@
   .tb-col .tb-quiet,
   .tb-file,
   .tb-hidden,
-  .tb-title-row .tb-quiet {
+  .tb-title-row .tb-quiet,
+  .tb-check,
+  .tb-filter {
     display: none !important;
   }
 

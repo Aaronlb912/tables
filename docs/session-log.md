@@ -56,4 +56,13 @@ visible column stays. Hidden columns stay in JSON and on the row
 page.
 Next session: Expand L. Filter a column.
 
+## 2026-09-17 - Expand L-O
+
+What runs: http://127.0.0.1:48721/
+What landed: Filter a column to a value or Empty. Check rows and
+remove selected; undo puts them back. Escape clears checks. Add
+CSV appends by column name; Shift+paste appends; Load / Paste CSV
+still replace. Search highlights hits. Zebra rows.
+Next session: ship later, when he asks.
+
 
