@@ -23,4 +23,13 @@ What landed: Add row opens a page. Open a row to edit every cell.
 Notes is a textarea. First column blank misses. Escape cancels.
 Next session: Expand B. Qty total and a bad-number miss.
 
+## 2026-09-17 - Expand B-E
+
+What runs: http://127.0.0.1:48721/
+What landed: Qty total. Bad number misses. Drag a row or a column.
+Paste CSV from the clipboard. Print this table. CSS pass including
+print. Junk JSON misses in the browser. Undo after Remove still
+works.
+Next session: ship later, when he asks.
+
 

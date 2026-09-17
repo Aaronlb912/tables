@@ -4,14 +4,18 @@ import {
   addColumn,
   blankRow,
   cloneRow,
+  columnTotal,
   downloadCsv,
   downloadTable,
+  isNumberColumn,
+  moveById,
   normalizeTable,
-  removeColumn,
-  renameColumn,
   parseCsv,
   parseFile,
+  parseNumberCell,
   readTextFile,
+  removeColumn,
+  renameColumn,
   rowMatches,
   sortRows,
 } from './table-json.js'
@@ -36,6 +40,11 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   const skipCol = useRef(false)
   const colInput = useRef(null)
   const [page, setPage] = useState(null)
+  const [dragRow, setDragRow] = useState(null)
+  const [overRow, setOverRow] = useState(null)
+  const [dragCol, setDragCol] = useState(null)
+  const [overCol, setOverCol] = useState(null)
+  const skipSort = useRef(false)
 
   useEffect(() => {
     setTableTitle(value.title)
@@ -89,6 +98,34 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     }
   }, [])
 
+  useEffect(() => {
+    function onPaste(event) {
+      if (page) return
+      const target = event.target
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return
+      }
+      const text = event.clipboardData?.getData('text/plain') || ''
+      if (!text.trim()) return
+      try {
+        const next = parseCsv(text)
+        event.preventDefault()
+        onChange({
+          ...next,
+          id: value.id,
+          title: value.title || next.title,
+        })
+        setMiss('')
+        setQuery('')
+        setSort(null)
+      } catch (error) {
+        setMiss(error.message || 'Could not paste that CSV.')
+      }
+    }
+    window.addEventListener('paste', onPaste)
+    return () => window.removeEventListener('paste', onPaste)
+  }, [onChange, page, value.id, value.title])
+
   const filtering = Boolean(query.trim())
   const matched = filtering
     ? value.rows.filter((row) => rowMatches(row, query, value.columns))
@@ -141,6 +178,12 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       skipSave.current = false
       return
     }
+    const column = value.columns.find((item) => item.id === editing.colId)
+    if (column && isNumberColumn(column) && !parseNumberCell(draft).ok) {
+      setMiss(`${column.name} has to be a number.`)
+      return
+    }
+    setMiss('')
     const rows = value.rows.map((row) => {
       if (row.id !== editing.rowId) return row
       return {
@@ -274,6 +317,10 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   }
 
   function toggleSort(colId) {
+    if (skipSort.current) {
+      skipSort.current = false
+      return
+    }
     setSort((current) => {
       if (!current || current.colId !== colId) return { colId, dir: 'asc' }
       if (current.dir === 'asc') return { colId, dir: 'desc' }
@@ -318,6 +365,52 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     }
   }
 
+  async function pasteCsv() {
+    try {
+      const text = await navigator.clipboard.readText()
+      if (!text.trim()) {
+        setMiss('Clipboard is empty.')
+        return
+      }
+      const next = parseCsv(text)
+      onChange({
+        ...next,
+        id: value.id,
+        title: value.title || next.title,
+      })
+      setMiss('')
+      setUndo(null)
+      setQuery('')
+      setSort(null)
+    } catch (error) {
+      setMiss(error.message || 'Could not paste that CSV.')
+    }
+  }
+
+  function printTable() {
+    window.print()
+  }
+
+  function dropRowOn(overId) {
+    const fromId = dragRow
+    setDragRow(null)
+    setOverRow(null)
+    if (!fromId || fromId === overId) return
+    onChange({ ...value, rows: moveById(value.rows, fromId, overId) })
+    setSort(null)
+    setMiss('')
+  }
+
+  function dropColOn(overId) {
+    const fromId = dragCol
+    skipSort.current = true
+    setDragCol(null)
+    setOverCol(null)
+    if (!fromId || fromId === overId) return
+    onChange({ ...value, columns: moveById(value.columns, fromId, overId) })
+    setMiss('')
+  }
+
   return (
     <div className="tb">
       <header className="tb-top">
@@ -348,7 +441,8 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             </div>
           )}
           <p className="tb-note">
-            Click a cell to change it. Open a row to edit the whole line. Search finds a row later.
+            Click a cell to change it. Open a row for the whole line. Drag a row or a
+            column to change order. Paste a CSV or print this table.
           </p>
         </div>
         <div className="tb-actions">
@@ -374,6 +468,12 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
           </button>
           <button type="button" className="tb-secondary" onClick={() => csvInput.current?.click()}>
             Load CSV
+          </button>
+          <button type="button" className="tb-secondary" onClick={pasteCsv}>
+            Paste CSV
+          </button>
+          <button type="button" className="tb-secondary" onClick={printTable}>
+            Print
           </button>
           <input
             ref={jsonInput}
@@ -446,7 +546,30 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                   const label = active ? `${column.name} ${sort.dir === 'desc' ? '↓' : '↑'}` : column.name
                   const renamingCol = colRename?.id === column.id
                   return (
-                    <th key={column.id} scope="col">
+                    <th
+                      key={column.id}
+                      scope="col"
+                      draggable={!renamingCol}
+                      className={overCol === column.id ? 'tb-drop-col' : undefined}
+                      onDragStart={(event) => {
+                        setDragCol(column.id)
+                        skipSort.current = true
+                        event.dataTransfer.effectAllowed = 'move'
+                        event.dataTransfer.setData('text/plain', column.id)
+                      }}
+                      onDragOver={(event) => {
+                        event.preventDefault()
+                        if (dragCol && dragCol !== column.id) setOverCol(column.id)
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault()
+                        dropColOn(column.id)
+                      }}
+                      onDragEnd={() => {
+                        setDragCol(null)
+                        setOverCol(null)
+                      }}
+                    >
                       {renamingCol ? (
                         <input
                           ref={colInput}
@@ -501,17 +624,45 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                 </tr>
               ) : (
                 shown.map((row) => (
-                <tr key={row.id}>
+                <tr
+                  key={row.id}
+                  draggable={!editing}
+                  className={overRow === row.id ? 'tb-drop-row' : undefined}
+                  onDragStart={(event) => {
+                    if (editing) {
+                      event.preventDefault()
+                      return
+                    }
+                    setDragRow(row.id)
+                    event.dataTransfer.effectAllowed = 'move'
+                    event.dataTransfer.setData('text/plain', row.id)
+                  }}
+                  onDragOver={(event) => {
+                    event.preventDefault()
+                    if (dragRow && dragRow !== row.id) setOverRow(row.id)
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault()
+                    dropRowOn(row.id)
+                  }}
+                  onDragEnd={() => {
+                    setDragRow(null)
+                    setOverRow(null)
+                  }}
+                >
                   {value.columns.map((column) => {
                     const active = editing && editing.rowId === row.id && editing.colId === column.id
+                    const numberCol = isNumberColumn(column)
                     return (
-                      <td key={column.id}>
+                      <td key={column.id} className={numberCol ? 'tb-num' : undefined}>
                         {active ? (
                           <input
                             ref={cellInput}
                             className="tb-cell-input"
                             value={draft}
+                            inputMode={numberCol ? 'decimal' : undefined}
                             aria-label={`${column.name} for this row`}
+                            draggable={false}
                             onChange={(event) => setDraft(event.target.value)}
                             onBlur={saveCell}
                             onKeyDown={(event) => {
@@ -548,6 +699,18 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                 ))
               )}
             </tbody>
+            {value.rows.length > 0 && value.columns.some(isNumberColumn) ? (
+              <tfoot>
+                <tr>
+                  {value.columns.map((column, index) => (
+                    <td key={column.id} className={isNumberColumn(column) ? 'tb-total tb-num' : undefined}>
+                      {isNumberColumn(column) ? columnTotal(shown, column) : index === 0 ? 'Total' : ''}
+                    </td>
+                  ))}
+                  <td className="tb-row-actions" />
+                </tr>
+              </tfoot>
+            ) : null}
           </table>
         </div>
       )}

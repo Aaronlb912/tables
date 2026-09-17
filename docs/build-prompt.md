@@ -15,8 +15,9 @@ Repo: https://github.com/Aaronlb912/tables
 Pages:
 - Table list: open, new blank, duplicate, remove. Reset sample.
 - Table: grid, click to edit, add row opens a page, Open a row,
-  load and download JSON (this table or all tables). Escape cancels
-  a cell or a page. Quiet Remove. Undo after Remove.
+  load and download JSON (this table or all tables), paste CSV,
+  print, drag a row or a column. Escape cancels a cell or a page.
+  Quiet Remove. Undo after Remove. Qty total. Bad number misses.
 - Row page: every column as a field. Notes is a longer box.
 
 Auth: none.
@@ -35,20 +36,21 @@ Empty bench is the empty table.
 - [x] Expand A: row page. Add row opens a page. Open a row. Notes
       is a longer box. Escape cancels. Miss if the first column is
       blank.
-- [ ] Expand B: Qty total and a bad-number miss.
-- [ ] Expand C: drag a row, drag a column. Order is the data.
-- [ ] Expand D: paste CSV from the clipboard. Print this table.
-- [ ] Expand E: CSS pass. Prove a junk JSON file in the browser.
+- [x] Expand B: Qty total and a bad-number miss.
+- [x] Expand C: drag a row, drag a column. Order is the data.
+- [x] Expand D: paste CSV from the clipboard. Print this table.
+- [x] Expand E: CSS pass. Prove a junk JSON file in the browser.
 - [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
 
 ## This session
 
-Expand A: row page. Landed.
+Expand B-E: Qty total, drag order, paste CSV, print, CSS, junk JSON.
 
 ## Next session
 
-Expand B: Qty total and a bad-number miss.
+Ship later, when he asks. Screenshots, demo video, README Demo,
+LinkedIn draft, SHIPPED.
 
 ## Usefulness check
 
@@ -81,16 +83,6 @@ Host apps get `value` / `onChange`. They can find a row later
 can change. `src/lib/` copies into an existing React app. Rename.
 Duplicate a table. Escape cancels a cell. Empty table says what to
 do next. Quiet Remove. Old JSON still loads.
-
-## This session
-
-Session 3: add, rename, and remove columns. Empty table still shows
-the header. Blank title and blank column name miss. Last column stays.
-
-## Next session
-
-Screenshots, demo video, README Demo, LinkedIn draft, SHIPPED. Prove
-a bad JSON file in the browser first if that is still open.
 
 ## SHIPPED means
 

@@ -153,6 +153,48 @@ export function rowMatches(row, query, columns) {
   return columns.some((column) => String(row.cells?.[column.id] || '').toLowerCase().includes(needle))
 }
 
+export function isNumberColumn(column) {
+  const name = String(column.name || column.id || '').toLowerCase().trim()
+  return name === 'qty' || name === 'count' || name === 'amount' || name === 'quantity'
+}
+
+export function parseNumberCell(text) {
+  const raw = String(text || '').trim()
+  if (raw === '') return { ok: true, value: null }
+  const n = Number(raw.replace(/,/g, ''))
+  if (Number.isNaN(n)) return { ok: false }
+  return { ok: true, value: n }
+}
+
+export function columnTotal(rows, column) {
+  let sum = 0
+  let any = false
+  rows.forEach((row) => {
+    const parsed = parseNumberCell(row.cells?.[column.id])
+    if (parsed.ok && parsed.value != null) {
+      sum += parsed.value
+      any = true
+    }
+  })
+  if (!any) return ''
+  return Number.isInteger(sum) ? String(sum) : String(Math.round(sum * 100) / 100)
+}
+
+export function moveById(list, fromId, overId) {
+  if (!fromId || !overId || fromId === overId) return list
+  const from = list.findIndex((item) => item.id === fromId)
+  if (from < 0) return list
+  const next = [...list]
+  const [item] = next.splice(from, 1)
+  const over = next.findIndex((entry) => entry.id === overId)
+  if (over < 0) {
+    next.push(item)
+    return next
+  }
+  next.splice(over, 0, item)
+  return next
+}
+
 export function sortRows(rows, columns, sort) {
   if (!sort?.colId) return rows
   const column = columns.find((item) => item.id === sort.colId)

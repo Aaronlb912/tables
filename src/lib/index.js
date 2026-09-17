@@ -23,4 +23,8 @@ export {
   addColumn,
   renameColumn,
   removeColumn,
+  isNumberColumn,
+  parseNumberCell,
+  columnTotal,
+  moveById,
 } from './table-json.js'

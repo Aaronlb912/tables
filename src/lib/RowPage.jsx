@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { cloneRow, normalizeRow } from './table-json.js'
+import { cloneRow, isNumberColumn, normalizeRow, parseNumberCell } from './table-json.js'
 import './table.css'
 
 function isNotesColumn(column) {
@@ -35,6 +35,14 @@ export function RowPage({ table, row, mode, onSave, onCancel, onRemove, onDuplic
     if (!String(cells[first.id] || '').trim()) {
       setMiss(`Need a ${first.name}.`)
       return null
+    }
+    for (let i = 0; i < table.columns.length; i += 1) {
+      const column = table.columns[i]
+      if (!isNumberColumn(column)) continue
+      if (!parseNumberCell(cells[column.id]).ok) {
+        setMiss(`${column.name} has to be a number.`)
+        return null
+      }
     }
     setMiss('')
     return normalizeRow({ ...row, cells }, table.columns, 0)
@@ -78,6 +86,7 @@ export function RowPage({ table, row, mode, onSave, onCancel, onRemove, onDuplic
             ) : (
               <input
                 value={cells[column.id] || ''}
+                inputMode={isNumberColumn(column) ? 'decimal' : undefined}
                 onChange={(event) => setCells({ ...cells, [column.id]: event.target.value })}
               />
             )}

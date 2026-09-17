@@ -30,7 +30,9 @@ tables after a refresh (Reset sample on the list if you want Willow
 Court back). Click a cell to type. Add row opens a page. Open a row
 to edit the whole line. Notes is a longer box. Escape cancels. Click a column
 name to sort. Add column. Quiet Edit and Remove on a column. Quiet
-Open, Duplicate, and Remove on a row.
+Open, Duplicate, and Remove on a row. Qty (or Count / Amount /
+Quantity) totals at the bottom. A bad number on that column misses.
+Drag a row or a column to change order. Paste CSV. Print this table.
 
 ## Run the demo
 
