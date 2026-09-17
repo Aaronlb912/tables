@@ -48,4 +48,12 @@ or one row. Drag a header edge to resize. Width stays in JSON. Undo
 after Remove column. Notes wrap on the grid.
 Next session: ship later, when he asks.
 
+## 2026-09-17 - Expand K
+
+What runs: http://127.0.0.1:48721/
+What landed: Hide a column on the grid. Show puts it back. Last
+visible column stays. Hidden columns stay in JSON and on the row
+page.
+Next session: Expand L. Filter a column.
+
 

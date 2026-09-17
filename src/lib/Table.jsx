@@ -7,6 +7,7 @@ import {
   columnTotal,
   downloadCsv,
   downloadTable,
+  hideColumn,
   isNumberColumn,
   isNotesColumn,
   moveById,
@@ -19,8 +20,10 @@ import {
   renameColumn,
   rowMatches,
   rowToCsv,
+  showColumn,
   sortRows,
   tableToCsv,
+  visibleColumns,
 } from './table-json.js'
 import './table.css'
 
@@ -136,6 +139,8 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     ? value.rows.filter((row) => rowMatches(row, query, value.columns))
     : value.rows
   const shown = sortRows(matched, value.columns, sort)
+  const gridCols = visibleColumns(value.columns)
+  const hiddenCols = value.columns.filter((column) => column.hidden)
 
   if (page) {
     return (
@@ -178,7 +183,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   }
 
   function neighbor(rowId, colId, key, shift) {
-    const cols = value.columns
+    const cols = gridCols
     const colIndex = cols.findIndex((item) => item.id === colId)
     const rowIndex = shown.findIndex((item) => item.id === rowId)
     if (colIndex < 0 || rowIndex < 0) return null
@@ -378,6 +383,27 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     undoTimer.current = setTimeout(() => setUndo(null), 12000)
   }
 
+  function hideCol(colId) {
+    const result = hideColumn(value, colId)
+    if (!result.ok) {
+      setMiss(result.error)
+      return
+    }
+    if (editing?.colId === colId) {
+      skipSave.current = true
+      setEditing(null)
+      setDraft('')
+    }
+    if (colRename?.id === colId) setColRename(null)
+    onChange(result.table)
+    setMiss('')
+  }
+
+  function showCol(colId) {
+    onChange(showColumn(value, colId))
+    setMiss('')
+  }
+
   function toggleSort(colId) {
     if (skipSort.current) {
       skipSort.current = false
@@ -556,8 +582,8 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
           <p className="tb-note">
             Click a cell to change it. Tab moves across. Enter moves down.
             Open a row for the whole line. Drag a row or a column to change
-            order. Drag a header edge to resize. Copy CSV. Paste a CSV or
-            print this table.
+            order. Drag a header edge to resize. Hide a column you do not
+            need on the grid. Copy CSV. Paste a CSV or print this table.
           </p>
         </div>
         <div className="tb-actions">
@@ -637,6 +663,17 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
         )}
       </div>
 
+      {hiddenCols.length ? (
+        <div className="tb-hidden">
+          <span>Hidden</span>
+          {hiddenCols.map((column) => (
+            <button key={column.id} type="button" className="tb-secondary" onClick={() => showCol(column.id)}>
+              Show {column.name}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       {miss ? <p className="tb-miss" role="alert">{miss}</p> : null}
       {undo ? (
         <p className="tb-undo">
@@ -659,17 +696,17 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
           <table
             className="tb-grid"
             style={
-              value.columns.some((column) => widthOf(column))
+              value.columns.some((column) => widthOf(column) && !column.hidden)
                 ? {
                     tableLayout: 'fixed',
-                    width: value.columns.reduce((sum, column) => sum + (widthOf(column) || 140), 88),
+                    width: gridCols.reduce((sum, column) => sum + (widthOf(column) || 140), 88),
                   }
                 : undefined
             }
           >
             <thead>
               <tr>
-                {value.columns.map((column, colIndex) => {
+                {gridCols.map((column, colIndex) => {
                   const active = sort?.colId === column.id
                   const label = active ? `${column.name} ${sort.dir === 'desc' ? '↓' : '↑'}` : column.name
                   const renamingCol = colRename?.id === column.id
@@ -736,6 +773,9 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                           >
                             Edit
                           </button>
+                          <button type="button" className="tb-quiet" onClick={() => hideCol(column.id)}>
+                            Hide
+                          </button>
                           <button type="button" className="tb-quiet" onClick={() => dropColumn(column.id)}>
                             Remove
                           </button>
@@ -759,7 +799,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             <tbody>
               {value.rows.length === 0 ? (
                 <tr>
-                  <td colSpan={value.columns.length + 1}>
+                  <td colSpan={gridCols.length + 1}>
                     <div className="tb-empty tb-empty-cell">
                       <p>No rows yet. Add a row, or load a CSV or JSON file.</p>
                       <button type="button" onClick={addRow}>
@@ -796,7 +836,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                     setOverRow(null)
                   }}
                 >
-                  {value.columns.map((column, colIndex) => {
+                  {gridCols.map((column, colIndex) => {
                     const active = editing && editing.rowId === row.id && editing.colId === column.id
                     const numberCol = isNumberColumn(column)
                     const notesCol = isNotesColumn(column)
@@ -873,10 +913,10 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                 ))
               )}
             </tbody>
-            {value.rows.length > 0 && value.columns.some(isNumberColumn) ? (
+            {value.rows.length > 0 && gridCols.some(isNumberColumn) ? (
               <tfoot>
                 <tr>
-                  {value.columns.map((column, index) => (
+                  {gridCols.map((column, index) => (
                     <td
                       key={column.id}
                       className={[

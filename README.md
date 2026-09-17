@@ -34,7 +34,8 @@ name to sort. Add column. Quiet Edit and Remove on a column. Quiet
 Open, Duplicate, Copy, and Remove on a row. Qty (or Count / Amount /
 Quantity) totals at the bottom. A bad number on that column misses.
 Drag a row or a column to change order. Drag a header edge to resize.
-Copy CSV. Paste CSV. Print this table. The first column and the
+Hide a column on the grid (Show puts it back). Copy CSV. Paste CSV.
+Print this table. The first column and the
 header stay when you scroll. Undo after Remove on a row or a column.
 
 ## Run the demo

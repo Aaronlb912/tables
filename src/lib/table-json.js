@@ -22,6 +22,7 @@ export function normalizeColumn(column, index) {
   }
   const width = Number(raw.width)
   if (Number.isFinite(width) && width >= 72) next.width = Math.round(width)
+  if (raw.hidden === true || raw.hidden === 'true') next.hidden = true
   return next
 }
 
@@ -164,6 +165,39 @@ export function isNumberColumn(column) {
 export function isNotesColumn(column) {
   const name = String(column.name || column.id || '').toLowerCase().trim()
   return name === 'notes' || name === 'note'
+}
+
+export function visibleColumns(columns) {
+  const list = Array.isArray(columns) ? columns : []
+  const shown = list.filter((column) => !column.hidden)
+  return shown.length ? shown : list
+}
+
+export function hideColumn(table, colId) {
+  const grid = visibleColumns(table.columns)
+  if (grid.length < 2) return { ok: false, error: 'Keep at least one column on the grid.' }
+  if (!grid.some((column) => column.id === colId)) {
+    return { ok: false, error: 'That column is already hidden.' }
+  }
+  return {
+    ok: true,
+    table: {
+      ...table,
+      columns: table.columns.map((column) => (column.id === colId ? { ...column, hidden: true } : column)),
+    },
+  }
+}
+
+export function showColumn(table, colId) {
+  return {
+    ...table,
+    columns: table.columns.map((column) => {
+      if (column.id !== colId) return column
+      const next = { ...column }
+      delete next.hidden
+      return next
+    }),
+  }
 }
 
 export function parseNumberCell(text) {

@@ -5,7 +5,7 @@ one table. JSON in, JSON out. Drop `src/lib/` into a React app you
 already have.
 
 Prompt file (do not wait for a paste):
-`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-2-prompt.md`
+`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-3-prompt.md`
 
 Ship later:
 `C:\Users\aaron\OneDrive\Documents\prompts\multi-session-build-prompt-react.md`
@@ -22,7 +22,7 @@ Pages:
   copy CSV, print, drag a row or a column, resize a column.
   Escape cancels a cell or a page. Quiet Remove. Undo after Remove
   on a row or a column. Qty total. Bad number misses. Sticky
-  header and first column.
+  header and first column. Hide a column.
 - Row page: every column as a field. Notes is a longer box.
 
 Auth: none.
@@ -50,17 +50,21 @@ Empty bench is the empty table.
 - [x] Expand H: copy this table or one row as CSV.
 - [x] Expand I: drag a column edge to resize.
 - [x] Expand J: undo a removed column, wrap notes, CSS.
+- [x] Expand K: hide a column on the grid.
+- [ ] Expand L: filter a column.
+- [ ] Expand M: check rows and remove selected.
+- [ ] Expand N: append CSV onto the open table.
+- [ ] Expand O: search highlight and CSS.
 - [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
 
 ## This session
 
-Expand G-J: sticky header, copy CSV, column width, undo column.
+Expand K: hide a column on the grid. Landed.
 
 ## Next session
 
-Ship later, when he asks. Screenshots, demo video, README Demo,
-LinkedIn draft, SHIPPED.
+Expand L: filter a column.
 
 ## Usefulness check
 

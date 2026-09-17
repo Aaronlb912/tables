@@ -71,7 +71,7 @@ export function RowPage({ table, row, mode, onSave, onCancel, onRemove, onDuplic
       <form className="tb-form" onSubmit={save}>
         {table.columns.map((column) => (
           <label key={column.id} className="tb-field">
-            <span>{column.name}</span>
+            <span>{column.name}{column.hidden ? ' (hidden)' : ''}</span>
             {isNotesColumn(column) ? (
               <textarea
                 rows={5}

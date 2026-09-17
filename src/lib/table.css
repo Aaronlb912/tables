@@ -251,6 +251,17 @@
   margin: 0 0 16px;
 }
 
+.tb-hidden {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  font-family: var(--tb-ui);
+  font-size: 13px;
+  color: var(--tb-ink-soft);
+}
+
 .tb-search {
   display: flex;
   align-items: center;
@@ -616,6 +627,7 @@
   .tb-row-actions,
   .tb-col .tb-quiet,
   .tb-file,
+  .tb-hidden,
   .tb-title-row .tb-quiet {
     display: none !important;
   }

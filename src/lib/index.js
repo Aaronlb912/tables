@@ -29,4 +29,7 @@ export {
   moveById,
   rowToCsv,
   tableToCsv,
+  visibleColumns,
+  hideColumn,
+  showColumn,
 } from './table-json.js'
