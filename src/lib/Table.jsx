@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { RowPage } from './RowPage.jsx'
 import {
   addColumn,
   blankRow,
@@ -34,6 +35,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   const skipSave = useRef(false)
   const skipCol = useRef(false)
   const colInput = useRef(null)
+  const [page, setPage] = useState(null)
 
   useEffect(() => {
     setTableTitle(value.title)
@@ -93,6 +95,27 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     : value.rows
   const shown = sortRows(matched, value.columns, sort)
 
+  if (page) {
+    return (
+      <RowPage
+        table={value}
+        row={page.row}
+        mode={page.mode}
+        onSave={savePageRow}
+        onCancel={() => setPage(null)}
+        onDuplicate={page.mode === 'edit' ? duplicatePageRow : undefined}
+        onRemove={
+          page.mode === 'edit'
+            ? () => {
+                removeRow(page.row.id)
+                setPage(null)
+              }
+            : undefined
+        }
+      />
+    )
+  }
+
   function commitTitle() {
     const next = tableTitle.trim()
     if (!next) {
@@ -134,11 +157,40 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   }
 
   function addRow() {
-    const row = blankRow(value.columns)
-    onChange({ ...value, rows: [...value.rows, row] })
+    if (!value.columns.length) {
+      setMiss('Add a column first.')
+      return
+    }
     setMiss('')
-    setEditing({ rowId: row.id, colId: value.columns[0]?.id })
-    setDraft('')
+    setEditing(null)
+    setPage({ mode: 'new', row: blankRow(value.columns) })
+  }
+
+  function openRow(row) {
+    setEditing(null)
+    setMiss('')
+    setPage({ mode: 'edit', row })
+  }
+
+  function savePageRow(next) {
+    if (page?.mode === 'new') {
+      onChange({ ...value, rows: [...value.rows, next] })
+    } else {
+      onChange({
+        ...value,
+        rows: value.rows.map((row) => (row.id === next.id ? next : row)),
+      })
+    }
+    setPage(null)
+  }
+
+  function duplicatePageRow(copy) {
+    const index = value.rows.findIndex((row) => row.id === page.row.id)
+    const rows = [...value.rows]
+    const at = index < 0 ? rows.length : index + 1
+    rows.splice(at, 0, copy)
+    onChange({ ...value, rows })
+    setPage({ mode: 'edit', row: copy })
   }
 
   function duplicateRow(id) {
@@ -296,8 +348,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             </div>
           )}
           <p className="tb-note">
-            Click a cell to change it. Search finds a row later. CSV in and out if you work in a
-            spreadsheet.
+            Click a cell to change it. Open a row to edit the whole line. Search finds a row later.
           </p>
         </div>
         <div className="tb-actions">
@@ -483,6 +534,9 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                     )
                   })}
                   <td className="tb-row-actions">
+                    <button type="button" className="tb-quiet" onClick={() => openRow(row)}>
+                      Open
+                    </button>
                     <button type="button" className="tb-quiet" onClick={() => duplicateRow(row.id)}>
                       Duplicate
                     </button>

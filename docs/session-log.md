@@ -16,6 +16,11 @@ What runs: Vite React demo at http://127.0.0.1:48721/
 What landed: Add column. Rename a column (Edit on the header). Remove
 a column. Last column stays. Blank column name misses. Empty table
 still shows the column header.
-Next session: screenshots, demo video, README Demo, LinkedIn, SHIPPED.
-Prove a bad JSON file in the browser if that is still open.
+## 2026-09-17 - Expand A
+
+What runs: http://127.0.0.1:48721/
+What landed: Add row opens a page. Open a row to edit every cell.
+Notes is a textarea. First column blank misses. Escape cancels.
+Next session: Expand B. Qty total and a bad-number miss.
+
 

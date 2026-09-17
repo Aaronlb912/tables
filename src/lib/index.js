@@ -1,5 +1,6 @@
 export { Table } from './Table.jsx'
 export { Workspace } from './Workspace.jsx'
+export { RowPage } from './RowPage.jsx'
 export { sampleEmptyTable, sampleTable, sampleWorkspace } from './sample-table.js'
 export {
   blankRow,

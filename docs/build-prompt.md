@@ -14,9 +14,10 @@ Repo: https://github.com/Aaronlb912/tables
 
 Pages:
 - Table list: open, new blank, duplicate, remove. Reset sample.
-- Table: grid, click to edit, add row, duplicate last row, rename,
+- Table: grid, click to edit, add row opens a page, Open a row,
   load and download JSON (this table or all tables). Escape cancels
-  a cell. Quiet Remove. Undo after Remove.
+  a cell or a page. Quiet Remove. Undo after Remove.
+- Row page: every column as a field. Notes is a longer box.
 
 Auth: none.
 
@@ -31,8 +32,23 @@ Empty bench is the empty table.
       on a blank table name, CSV in and out.
 - [x] Session 3: add/rename/remove columns, persist polish, old
       JSON still loads, empty table and bad file.
-- [ ] Session 4: screenshots, demo video, README Demo, LinkedIn
+- [x] Expand A: row page. Add row opens a page. Open a row. Notes
+      is a longer box. Escape cancels. Miss if the first column is
+      blank.
+- [ ] Expand B: Qty total and a bad-number miss.
+- [ ] Expand C: drag a row, drag a column. Order is the data.
+- [ ] Expand D: paste CSV from the clipboard. Print this table.
+- [ ] Expand E: CSS pass. Prove a junk JSON file in the browser.
+- [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
+
+## This session
+
+Expand A: row page. Landed.
+
+## Next session
+
+Expand B: Qty total and a bad-number miss.
 
 ## Usefulness check
 

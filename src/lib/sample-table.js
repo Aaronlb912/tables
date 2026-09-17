@@ -40,7 +40,7 @@ export const sampleTable = {
         size: '15 gal',
         qty: '4',
         unit: 'pot',
-        notes: 'Hold for Rivera',
+        notes: 'Hold for Rivera. Call if the root ball is dry.',
       },
     },
     {
