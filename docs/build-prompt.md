@@ -5,6 +5,9 @@ one table. JSON in, JSON out. Drop `src/lib/` into a React app you
 already have.
 
 Prompt file (do not wait for a paste):
+`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-2-prompt.md`
+
+Ship later:
 `C:\Users\aaron\OneDrive\Documents\prompts\multi-session-build-prompt-react.md`
 
 Kind: table editor. Not a search page. Not a board. Not a calendar.
@@ -40,17 +43,21 @@ Empty bench is the empty table.
 - [x] Expand C: drag a row, drag a column. Order is the data.
 - [x] Expand D: paste CSV from the clipboard. Print this table.
 - [x] Expand E: CSS pass. Prove a junk JSON file in the browser.
+- [x] Expand F: Tab and Enter through cells.
+- [ ] Expand G: sticky header and first column.
+- [ ] Expand H: copy this table or one row as CSV.
+- [ ] Expand I: drag a column edge to resize.
+- [ ] Expand J: undo a removed column, wrap notes, CSS.
 - [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
 
 ## This session
 
-Expand B-E: Qty total, drag order, paste CSV, print, CSS, junk JSON.
+Expand F: Tab and Enter through cells. Landed.
 
 ## Next session
 
-Ship later, when he asks. Screenshots, demo video, README Demo,
-LinkedIn draft, SHIPPED.
+Expand G: sticky header and first column.
 
 ## Usefulness check
 

@@ -45,6 +45,7 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   const [dragCol, setDragCol] = useState(null)
   const [overCol, setOverCol] = useState(null)
   const skipSort = useRef(false)
+  const moving = useRef(false)
 
   useEffect(() => {
     setTableTitle(value.title)
@@ -172,15 +173,40 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
     setMiss('')
   }
 
-  function saveCell() {
+  function neighbor(rowId, colId, key, shift) {
+    const cols = value.columns
+    const colIndex = cols.findIndex((item) => item.id === colId)
+    const rowIndex = shown.findIndex((item) => item.id === rowId)
+    if (colIndex < 0 || rowIndex < 0) return null
+    if (key === 'Tab') {
+      let nextCol = colIndex + (shift ? -1 : 1)
+      let nextRow = rowIndex
+      if (nextCol >= cols.length) {
+        nextCol = 0
+        nextRow += 1
+      } else if (nextCol < 0) {
+        nextCol = cols.length - 1
+        nextRow -= 1
+      }
+      if (nextRow < 0 || nextRow >= shown.length) return null
+      return { row: shown[nextRow], column: cols[nextCol] }
+    }
+    const nextRow = rowIndex + (shift ? -1 : 1)
+    if (nextRow < 0 || nextRow >= shown.length) return null
+    return { row: shown[nextRow], column: cols[colIndex] }
+  }
+
+  function saveCell(next) {
     if (!editing) return
     if (skipSave.current) {
       skipSave.current = false
+      moving.current = false
       return
     }
     const column = value.columns.find((item) => item.id === editing.colId)
     if (column && isNumberColumn(column) && !parseNumberCell(draft).ok) {
       setMiss(`${column.name} has to be a number.`)
+      moving.current = false
       return
     }
     setMiss('')
@@ -195,6 +221,11 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       }
     })
     onChange({ ...value, rows })
+    if (next?.row && next?.column) {
+      const row = rows.find((item) => item.id === next.row.id) || next.row
+      startEdit(row, next.column)
+      return
+    }
     setEditing(null)
     setDraft('')
   }
@@ -441,8 +472,9 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             </div>
           )}
           <p className="tb-note">
-            Click a cell to change it. Open a row for the whole line. Drag a row or a
-            column to change order. Paste a CSV or print this table.
+            Click a cell to change it. Tab moves across. Enter moves down.
+            Open a row for the whole line. Drag a row or a column to change
+            order. Paste a CSV or print this table.
           </p>
         </div>
         <div className="tb-actions">
@@ -664,11 +696,24 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                             aria-label={`${column.name} for this row`}
                             draggable={false}
                             onChange={(event) => setDraft(event.target.value)}
-                            onBlur={saveCell}
+                            onBlur={() => {
+                              if (moving.current) {
+                                moving.current = false
+                                return
+                              }
+                              saveCell()
+                            }}
                             onKeyDown={(event) => {
+                              if (event.key === 'Tab') {
+                                event.preventDefault()
+                                moving.current = true
+                                saveCell(neighbor(row.id, column.id, 'Tab', event.shiftKey))
+                                return
+                              }
                               if (event.key === 'Enter') {
                                 event.preventDefault()
-                                saveCell()
+                                moving.current = true
+                                saveCell(neighbor(row.id, column.id, 'Enter', event.shiftKey))
                               }
                             }}
                           />

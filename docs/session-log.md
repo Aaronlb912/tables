@@ -32,4 +32,12 @@ print. Junk JSON misses in the browser. Undo after Remove still
 works.
 Next session: ship later, when he asks.
 
+## 2026-09-17 - Expand F
+
+What runs: http://127.0.0.1:48721/
+What landed: Tab moves to the next cell. Shift+Tab back. Enter moves
+down. Shift+Enter up. Escape still cancels. A bad Qty stays on that
+cell.
+Next session: Expand G. Sticky header and first column.
+
 
