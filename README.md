@@ -4,6 +4,12 @@ Editable tables for a count you already keep. Click a cell. Add a
 row. Keep more than one table. Search. Sort. Load and download JSON
 or CSV. Drop `src/lib/` into a React app you already have.
 
+Try it:
+https://aaronlb912.github.io/tables/
+
+Tables on that page stay in your browser. Get the files if you want
+the grid in your own app.
+
 The demo starts on the table list. DEMO TABLE Willow Court Nursery
 is the sample. Names are fake. Open it, or make a blank table.
 
@@ -45,12 +51,32 @@ scroll. Undo after Remove on a row or a column.
 
 ## Run the demo
 
+Live: https://aaronlb912.github.io/tables/
+
+Files: https://github.com/Aaronlb912/tables
+
+On your machine:
+
 ```
 npm install
 npm start
 ```
 
 Open http://127.0.0.1:48721/
+
+## Demo
+
+![The table list. DEMO TABLE Willow Court Nursery is the sample.](docs/media/tables-page.png)
+
+![DEMO TABLE Willow Court Nursery with plants on the grid.](docs/media/tables-result.png)
+
+![Type a word in Qty. Qty has to be a number.](docs/media/tables-miss.png)
+
+https://github.com/user-attachments/assets/e2f5f830-e9f4-478a-b005-92ca967a2a8d
+
+Repo copy: [docs/media/tables-demo.mp4](docs/media/tables-demo.mp4)
+
+Voice is Microsoft Andrew Neural. Music is Wallpaper by Kevin MacLeod (incompetech.com), CC BY 3.0.
 
 ## Use it in your own React app
 

@@ -91,4 +91,14 @@ with a comma. Open a row still opens the page. 0, 51, and
 blank names miss.
 Next session: ship later, when he asks.
 
+## 2026-09-17 - Session ship - SHIPPED
+
+What runs: http://127.0.0.1:48721/
+Live: https://aaronlb912.github.io/tables/
+What landed: Tool stills in docs/media/ (page, result, miss).
+Labeled walkthrough docs/media/tables-demo.mp4. README Demo
+stills plus github.com player. GitHub Pages. LinkedIn draft
+stays local.
+SHIPPED.
+
 

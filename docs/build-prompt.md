@@ -1,11 +1,11 @@
-# TARGET 2026-09-17
+# TARGET 2026-09-17 SHIPPED
 
 Editable tables. Named columns. Click a cell. Add a row. Keep more than
 one table. JSON in, JSON out. Drop `src/lib/` into a React app you
 already have.
 
 Prompt file (do not wait for a paste):
-`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-6-prompt.md`
+`C:\Users\aaron\OneDrive\Documents\prompts\multi-session-build-prompt-react.md`
 
 Ship later:
 `C:\Users\aaron\OneDrive\Documents\prompts\multi-session-build-prompt-react.md`
@@ -65,16 +65,17 @@ Empty bench is the empty table.
 - [x] Expand U: shorter help, more air on the sheet.
 - [x] Expand V: add one or several blank rows on the grid.
 - [x] Expand W: type your own headers, or a few at once.
-- [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
+- [x] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
 
 ## This session
 
-Expand V-W: add rows on the grid and your own headers. Landed.
+Ship. Screenshots, demo video, README Demo, GitHub Pages.
+SHIPPED.
 
 ## Next session
 
-Ship later, when he asks.
+Done. Do not start the next product in this repo.
 
 ## Usefulness check
 
