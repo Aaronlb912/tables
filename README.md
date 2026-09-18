@@ -28,9 +28,11 @@ No account. Nothing sends mail. A new table starts empty with Name,
 Qty, and Notes. You cannot remove the last table. The demo keeps
 tables after a refresh (Reset sample on the list if you want Willow
 Court back). Click a cell to type. Tab moves to the next cell. Enter moves
-down. Add row opens a page. Open a row
+down. Add row puts a blank line on the grid. Set how many to add
+a few at once. Type a header name, or two names with a comma, then
+Add column. Open a row
 to edit the whole line. Notes is a longer box. Escape cancels. Click a column
-name to sort. Add column. Quiet Edit and Remove on a column. Quiet
+name to sort. Quiet Edit and Remove on a column. Quiet
 Open, Duplicate, Copy, and Remove on a row. Qty (or Count / Amount /
 Quantity) totals at the bottom. A bad number on that column misses.
 Drag a row or a column to change order. Drag a header edge to resize.

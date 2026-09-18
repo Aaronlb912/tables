@@ -82,4 +82,13 @@ paper. Header Edit / Hide / Remove stay faintly visible. Shorter
 help line. A little more air on the sheet and list cards.
 Next session: ship later, when he asks.
 
+## 2026-09-17 - Expand V-W
+
+What runs: http://127.0.0.1:48721/
+What landed: Add row puts blank lines on the grid. A count
+field adds up to 50 at once. Type a header, or a few names
+with a comma. Open a row still opens the page. 0, 51, and
+blank names miss.
+Next session: ship later, when he asks.
+
 

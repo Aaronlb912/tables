@@ -21,6 +21,7 @@ export {
   parseFile,
   appendCsv,
   addColumn,
+  addColumns,
   rowMatchesFilter,
   columnValues,
   renameColumn,

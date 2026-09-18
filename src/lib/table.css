@@ -83,6 +83,37 @@
   align-items: center;
 }
 
+.tb-add {
+  display: flex;
+  align-items: center;
+}
+
+.tb-count,
+.tb-headers {
+  font-family: var(--tb-ui);
+  font-size: 13px;
+  color: var(--tb-ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--tb-ink);
+  padding: 6px 4px 5px;
+  border-radius: 0;
+}
+
+.tb-count {
+  width: 3.25rem;
+}
+
+.tb-headers {
+  width: 8.5rem;
+}
+
+.tb-count:focus-visible,
+.tb-headers:focus-visible {
+  outline: 0;
+  border-bottom-color: var(--tb-head);
+}
+
 .tb button {
   font-family: var(--tb-ui);
   font-size: 13px;
@@ -190,13 +221,13 @@
   text-transform: uppercase;
   color: var(--tb-paper);
   background: var(--tb-head);
-  padding: 8px 14px 8px 10px;
+  padding: 6px 10px 7px;
   white-space: normal;
   vertical-align: top;
 }
 
 .tb-grid td {
-  border-top: 1px solid var(--tb-line);
+  border-top: 1px solid #d4dcc8;
   padding: 0;
   vertical-align: stretch;
 }
@@ -204,13 +235,13 @@
 .tb-cell {
   display: block;
   width: 100%;
-  min-height: 44px;
+  min-height: 40px;
   text-align: left;
   background: transparent;
   color: inherit;
   border: 0;
   border-radius: 0;
-  padding: 11px 12px;
+  padding: 9px 10px;
   font: inherit;
   transition: background 0.12s ease;
 }
@@ -252,22 +283,38 @@
   position: sticky;
   right: 0;
   z-index: 2;
-  width: 1%;
+  width: 0.6rem;
+  min-width: 0.6rem;
+  max-width: 0.6rem;
+  padding: 0;
   white-space: nowrap;
   text-align: right;
-  background: var(--tb-paper);
-  box-shadow: -2px 0 0 var(--tb-line);
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
 }
 
-.tb-grid thead th.tb-row-actions {
+.tb-grid thead th.tb-row-actions,
+.tb-grid tfoot td.tb-row-actions {
   z-index: 6;
   background: var(--tb-head);
-  box-shadow: -2px 0 0 rgba(0, 0, 0, 0.18);
+  box-shadow: none;
 }
 
 .tb-grid tfoot td.tb-row-actions {
   z-index: 4;
   background: #e7eedd;
+}
+
+.tb-grid tbody tr:hover td.tb-row-actions,
+.tb-grid tbody tr:focus-within td.tb-row-actions {
+  width: 1%;
+  min-width: 11rem;
+  max-width: none;
+  padding: 4px 8px;
+  overflow: visible;
+  background: var(--tb-paper);
+  box-shadow: -1px 0 0 #d4dcc8;
 }
 
 .tb-file {
@@ -322,15 +369,18 @@
 .tb-search input {
   font: inherit;
   color: var(--tb-ink);
-  border: 1px solid var(--tb-line);
-  background: #fffef8;
-  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--tb-line);
+  background: transparent;
+  padding: 6px 2px 5px;
   min-width: 16rem;
+  border-radius: 0;
+  transition: border-color 0.12s ease;
 }
 
 .tb-search input:focus-visible {
-  outline: 2px solid var(--tb-head);
-  outline-offset: 0;
+  outline: 0;
+  border-bottom-color: var(--tb-head);
 }
 
 .tb-undo {
@@ -453,14 +503,15 @@
 }
 
 .tb-col .tb-quiet {
-  opacity: 0.55;
+  opacity: 0;
   color: var(--tb-paper);
-  padding: 2px 6px;
+  padding: 2px 5px;
+  font-size: 11px;
 }
 
 .tb-grid th:hover .tb-col .tb-quiet,
 .tb-grid th:focus-within .tb-col .tb-quiet {
-  opacity: 1;
+  opacity: 0.9;
 }
 
 .tb-col-input {
@@ -515,12 +566,16 @@
 }
 
 .tb-row-actions .tb-quiet {
-  opacity: 0.72;
+  font-size: 12px;
+  padding: 2px 5px;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.tb-grid tr:hover .tb-row-actions .tb-quiet,
-.tb-grid tr:focus-within .tb-row-actions .tb-quiet {
+.tb-grid tbody tr:hover .tb-row-actions .tb-quiet,
+.tb-grid tbody tr:focus-within .tb-row-actions .tb-quiet {
   opacity: 1;
+  pointer-events: auto;
   color: var(--tb-ink);
 }
 
@@ -541,6 +596,19 @@
   .tb-row-actions .tb-quiet,
   .tb-col .tb-quiet {
     opacity: 1;
+    pointer-events: auto;
+  }
+
+  .tb-row-actions,
+  .tb-grid tbody tr:hover td.tb-row-actions,
+  .tb-grid tbody tr:focus-within td.tb-row-actions {
+    width: 1%;
+    min-width: 11rem;
+    max-width: none;
+    padding: 4px 8px;
+    overflow: visible;
+    background: var(--tb-paper);
+    box-shadow: -1px 0 0 #d4dcc8;
   }
 }
 
@@ -577,23 +645,27 @@
   font: inherit;
   font-size: 15px;
   color: var(--tb-ink);
-  background: #fffef8;
-  border: 1px solid var(--tb-line);
-  padding: 10px 12px;
-  border-radius: var(--tb-radius);
-}
-
-.tb-field input:focus-visible,
-.tb-field textarea:focus-visible {
-  outline: 2px solid var(--tb-head);
-  outline-offset: -2px;
-  border-color: var(--tb-head);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--tb-line);
+  padding: 8px 2px 7px;
+  border-radius: 0;
+  transition: border-color 0.12s ease;
 }
 
 .tb-field textarea {
   min-height: 8rem;
   resize: vertical;
   line-height: 1.45;
+  border: 1px solid var(--tb-line);
+  background: #fffef8;
+  padding: 10px 12px;
+}
+
+.tb-field input:focus-visible,
+.tb-field textarea:focus-visible {
+  outline: 0;
+  border-color: var(--tb-head);
 }
 
 .tb-page .tb-actions {
@@ -696,10 +768,11 @@
 }
 
 .tb-grid .tb-check input {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   margin: 0;
   accent-color: var(--tb-head);
+  vertical-align: middle;
 }
 
 .tb-grid thead th.tb-check {
@@ -721,20 +794,32 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 3px 4px;
+  padding: 2px 0 3px;
   font-family: var(--tb-ui);
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0;
   text-transform: none;
   font-weight: 400;
+  color: #fffef8;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 254, 248, 0.3);
+  border-radius: 0;
+  transition: border-color 0.12s ease;
+}
+
+.tb-filter option {
   color: var(--tb-ink);
   background: #fffef8;
-  border: 1px solid #8a9b80;
+}
+
+.tb-filter:not([value='__all__']) {
+  border-bottom-color: #fffef8;
 }
 
 .tb-filter:focus-visible {
-  outline: 2px solid #fffef8;
-  outline-offset: 0;
+  outline: 0;
+  border-bottom-color: #fffef8;
 }
 
 .tb-hit {
@@ -745,13 +830,13 @@
 }
 
 .tb-grid tbody tr:nth-child(even) td {
-  background: #efeadd;
+  background: #f3efe4;
 }
 
 .tb-grid tbody tr:nth-child(even) td.tb-sticky-col,
 .tb-grid tbody tr:nth-child(even) td.tb-check,
 .tb-grid tbody tr:nth-child(even) td.tb-row-actions {
-  background: #efeadd;
+  background: #f3efe4;
 }
 
 .tb-grid tbody tr.tb-checked td,

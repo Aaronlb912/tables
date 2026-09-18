@@ -133,6 +133,15 @@ export function addColumn(table, name = 'New column') {
   return { ...table, columns, rows }
 }
 
+export function addColumns(table, names) {
+  const list = String(names || '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean)
+  if (!list.length) throw new Error('Need a column name.')
+  return list.reduce((current, name) => addColumn(current, name), table)
+}
+
 export function renameColumn(table, colId, name) {
   return {
     ...table,

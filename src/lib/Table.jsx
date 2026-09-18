@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { RowPage } from './RowPage.jsx'
 import {
   addColumn,
+  addColumns,
   appendCsv,
   blankRow,
   cloneRow,
@@ -76,6 +77,8 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   const [query, setQuery] = useState('')
   const [colFilter, setColFilter] = useState(null)
   const [checked, setChecked] = useState({})
+  const [rowCount, setRowCount] = useState('1')
+  const [colDraft, setColDraft] = useState('')
   const [sort, setSort] = useState(null)
   const [undo, setUndo] = useState(null)
   const [colRename, setColRename] = useState(null)
@@ -303,9 +306,22 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
       setMiss('Add a column first.')
       return
     }
+    const n = Number(rowCount)
+    if (!Number.isInteger(n) || n < 1) {
+      setMiss('How many rows has to be a whole number.')
+      return
+    }
+    if (n > 50) {
+      setMiss('Add up to 50 rows at a time.')
+      return
+    }
+    const added = Array.from({ length: n }, () => blankRow(value.columns))
+    onChange({ ...value, rows: [...value.rows, ...added] })
     setMiss('')
-    setEditing(null)
-    setPage({ mode: 'new', row: blankRow(value.columns) })
+    setQuery('')
+    setColFilter(null)
+    const firstCol = gridCols[0] || value.columns[0]
+    if (firstCol) startEdit(added[0], firstCol)
   }
 
   function openRow(row) {
@@ -463,6 +479,24 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
   }
 
   function addCol() {
+    const names = colDraft
+      .split(',')
+      .map((name) => name.trim())
+      .filter(Boolean)
+    if (colDraft.trim() && !names.length) {
+      setMiss('Need a column name.')
+      return
+    }
+    if (names.length) {
+      try {
+        onChange(addColumns(value, names.join(', ')))
+        setColDraft('')
+        setMiss('')
+      } catch (error) {
+        setMiss(error.message || 'Need a column name.')
+      }
+      return
+    }
     const next = addColumn(value)
     const column = next.columns[next.columns.length - 1]
     onChange(next)
@@ -728,9 +762,9 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             </div>
           )}
           <p className="tb-note">
-            Click a cell. Tab and Enter move. Open a row for the whole
-            line. Hide or filter a column. Check rows to remove a few.
-            Paste CSV replaces. Add CSV or Shift+paste adds rows.
+            Click a cell. Tab and Enter move. Add a few rows on the
+            grid, or type your own headers. Open a row for the whole
+            line. Hide or filter a column. Paste CSV replaces.
           </p>
         </div>
         <div className="tb-actions">
@@ -739,9 +773,41 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
               All tables
             </button>
           ) : null}
+          <label className="tb-add">
+            <span className="tb-visually-hidden">How many rows</span>
+            <input
+              className="tb-count"
+              type="number"
+              min="1"
+              max="50"
+              value={rowCount}
+              onChange={(event) => setRowCount(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  addRow()
+                }
+              }}
+            />
+          </label>
           <button type="button" onClick={addRow}>
             Add row
           </button>
+          <label className="tb-add">
+            <span className="tb-visually-hidden">New headers</span>
+            <input
+              className="tb-headers"
+              value={colDraft}
+              placeholder="Bin, Color"
+              onChange={(event) => setColDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  addCol()
+                }
+              }}
+            />
+          </label>
           <button type="button" className="tb-secondary" onClick={addCol}>
             Add column
           </button>

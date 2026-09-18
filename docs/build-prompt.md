@@ -5,7 +5,7 @@ one table. JSON in, JSON out. Drop `src/lib/` into a React app you
 already have.
 
 Prompt file (do not wait for a paste):
-`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-5-prompt.md`
+`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-6-prompt.md`
 
 Ship later:
 `C:\Users\aaron\OneDrive\Documents\prompts\multi-session-build-prompt-react.md`
@@ -17,7 +17,8 @@ Repo: https://github.com/Aaronlb912/tables
 
 Pages:
 - Table list: open, new blank, duplicate, remove. Reset sample.
-- Table: grid, click to edit, add row opens a page, Open a row,
+- Table: grid, click to edit, add one or several blank rows on
+  the grid, type your own headers, Open a row,
   load and download JSON (this table or all tables), paste CSV,
   copy CSV, print, drag a row or a column, resize a column.
   Escape cancels a cell or a page. Quiet Remove. Undo after Remove
@@ -62,12 +63,14 @@ Empty bench is the empty table.
 - [x] Expand S: paper secondary buttons, dark primary.
 - [x] Expand T: header tools visible at rest.
 - [x] Expand U: shorter help, more air on the sheet.
+- [x] Expand V: add one or several blank rows on the grid.
+- [x] Expand W: type your own headers, or a few at once.
 - [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
 
 ## This session
 
-Expand S-U: smoother CSS. Landed.
+Expand V-W: add rows on the grid and your own headers. Landed.
 
 ## Next session
 
