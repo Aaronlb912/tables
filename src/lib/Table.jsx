@@ -957,22 +957,24 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
                         />
                       ) : (
                         <div className="tb-col">
-                          <button type="button" className="tb-sort" onClick={() => toggleSort(column.id)}>
-                            {label}
-                          </button>
-                          <button
-                            type="button"
-                            className="tb-quiet"
-                            onClick={() => setColRename({ id: column.id, draft: column.name })}
-                          >
-                            Edit
-                          </button>
-                          <button type="button" className="tb-quiet" onClick={() => hideCol(column.id)}>
-                            Hide
-                          </button>
-                          <button type="button" className="tb-quiet" onClick={() => dropColumn(column.id)}>
-                            Remove
-                          </button>
+                          <div className="tb-col-line">
+                            <button type="button" className="tb-sort" onClick={() => toggleSort(column.id)}>
+                              {label}
+                            </button>
+                            <button
+                              type="button"
+                              className="tb-quiet"
+                              onClick={() => setColRename({ id: column.id, draft: column.name })}
+                            >
+                              Edit
+                            </button>
+                            <button type="button" className="tb-quiet" onClick={() => hideCol(column.id)}>
+                              Hide
+                            </button>
+                            <button type="button" className="tb-quiet" onClick={() => dropColumn(column.id)}>
+                              Remove
+                            </button>
+                          </div>
                           <select
                             className="tb-filter"
                             aria-label={`Filter ${column.name}`}

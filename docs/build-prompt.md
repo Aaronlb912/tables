@@ -5,7 +5,7 @@ one table. JSON in, JSON out. Drop `src/lib/` into a React app you
 already have.
 
 Prompt file (do not wait for a paste):
-`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-3-prompt.md`
+`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-4-prompt.md`
 
 Ship later:
 `C:\Users\aaron\OneDrive\Documents\prompts\multi-session-build-prompt-react.md`
@@ -56,13 +56,15 @@ Empty bench is the empty table.
 - [x] Expand M: check rows and remove selected.
 - [x] Expand N: append CSV onto the open table.
 - [x] Expand O: search highlight and CSS.
+- [x] Expand P: sheet chrome, title then tools, list cards.
+- [x] Expand Q: header filter stack, checks, sticky row actions.
+- [x] Expand R: 390 width and row page fields.
 - [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
 
 ## This session
 
-Expand L-O: filter, check rows, append CSV, search
-highlight. Landed.
+Expand P-R: CSS and layout. Landed.
 
 ## Next session
 

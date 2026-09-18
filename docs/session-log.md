@@ -65,4 +65,13 @@ CSV appends by column name; Shift+paste appends; Load / Paste CSV
 still replace. Search highlights hits. Zebra rows.
 Next session: ship later, when he asks.
 
+## 2026-09-17 - Expand P-R
+
+What runs: http://127.0.0.1:48721/
+What landed: Title then tools. Find, chips, miss, and the grid
+read as one sheet. Filter under the column name. Row actions stay
+on the right. List cards use the title face. 390 and the row page
+got a CSS pass.
+Next session: ship later, when he asks.
+
 

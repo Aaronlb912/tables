@@ -38,8 +38,8 @@ Hide a column on the grid (Show puts it back). Filter a header to
 one value or Empty. Check rows and remove the selected ones. Copy
 CSV. Paste CSV replaces the open table. Add CSV or Shift+paste adds
 rows by column name. Print this table. Find highlights matches.
-The first column and the header stay when you scroll. Undo after
-Remove on a row or a column.
+The first column, the header, and the row actions stay when you
+scroll. Undo after Remove on a row or a column.
 
 ## Run the demo
 
