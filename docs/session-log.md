@@ -74,4 +74,12 @@ on the right. List cards use the title face. 390 and the row page
 got a CSS pass.
 Next session: ship later, when he asks.
 
+## 2026-09-17 - Expand S-U
+
+What runs: http://127.0.0.1:48721/
+What landed: Add row and New table stay dark. The other tools are
+paper. Header Edit / Hide / Remove stay faintly visible. Shorter
+help line. A little more air on the sheet and list cards.
+Next session: ship later, when he asks.
+
 

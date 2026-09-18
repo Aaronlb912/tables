@@ -728,12 +728,9 @@ export function Table({ value, onChange, onTables, onLoadWorkspace }) {
             </div>
           )}
           <p className="tb-note">
-            Click a cell to change it. Tab moves across. Enter moves down.
-            Open a row for the whole line. Drag a row or a column to change
-            order. Drag a header edge to resize. Hide a column you do not
-            need on the grid. Filter a column. Check rows to remove a few
-            at once. Copy CSV. Paste a CSV to replace, Shift+paste or Add
-            CSV to append. Print this table.
+            Click a cell. Tab and Enter move. Open a row for the whole
+            line. Hide or filter a column. Check rows to remove a few.
+            Paste CSV replaces. Add CSV or Shift+paste adds rows.
           </p>
         </div>
         <div className="tb-actions">

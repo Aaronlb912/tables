@@ -5,7 +5,7 @@ one table. JSON in, JSON out. Drop `src/lib/` into a React app you
 already have.
 
 Prompt file (do not wait for a paste):
-`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-4-prompt.md`
+`C:\Users\aaron\OneDrive\Documents\prompts\other prompts\tables-expand-5-prompt.md`
 
 Ship later:
 `C:\Users\aaron\OneDrive\Documents\prompts\multi-session-build-prompt-react.md`
@@ -59,12 +59,15 @@ Empty bench is the empty table.
 - [x] Expand P: sheet chrome, title then tools, list cards.
 - [x] Expand Q: header filter stack, checks, sticky row actions.
 - [x] Expand R: 390 width and row page fields.
+- [x] Expand S: paper secondary buttons, dark primary.
+- [x] Expand T: header tools visible at rest.
+- [x] Expand U: shorter help, more air on the sheet.
 - [ ] Session ship: screenshots, demo video, README Demo, LinkedIn
       draft, SHIPPED.
 
 ## This session
 
-Expand P-R: CSS and layout. Landed.
+Expand S-U: smoother CSS. Landed.
 
 ## Next session
 
